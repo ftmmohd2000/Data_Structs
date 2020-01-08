@@ -13,18 +13,33 @@ public class AVLT{
             this.insertNode(arr[i]);
     }
 
-    private void balanceTree(){
+    private void balanceTree(Node check){
         this.updateBalance(headNode);
+
+        while(check.balance >= -1 && check.balance <= 1)
+            check = check.parent;
+        if(check.balance < 0){
+            if(check.rightNode.rightNode != null)
+                rotateRR(check);
+            else
+                rotateRL(check);
+        }
+        else{
+            if(check.leftNode.leftNode != null)
+                rotateLL(check);
+            else
+                rotateLR(check);
+        }
     }
 
-    private void rotateLL(Node X,int dir){
+    private void rotateLL(Node X){
         
         Node A = X;
         Node B = X.leftNode;
         Node P = X.parent;
         Node Br = B.rightNode;
 
-        if(dir == 1)
+        if(B.value>P.value)
             P.rightNode = B;
         else
             P.leftNode = B;
@@ -36,7 +51,7 @@ public class AVLT{
         Br.parent = A;
     }
 
-    private void rotateLR(Node X,int dir){
+    private void rotateLR(Node X){
         Node A = X;
         Node B = X.leftNode;
         Node C = X.leftNode.rightNode;
@@ -44,7 +59,7 @@ public class AVLT{
         Node Cr = C.rightNode;
         Node Cl = C.leftNode;
 
-        if(dir == 1)
+        if(C.value>P.value)
             P.rightNode = C;
         else
             P.leftNode = C;
@@ -60,14 +75,14 @@ public class AVLT{
         Cr.parent = A;
     }
 
-    private void rotateRR(Node X,int dir){
+    private void rotateRR(Node X){
         
         Node A = X;
         Node B = X.rightNode;
         Node P = X.parent;
         Node Bl = B.leftNode;
 
-        if(dir == 1)
+        if(B.value>P.value)
             P.rightNode = B;
         else
             P.leftNode = B;
@@ -79,7 +94,7 @@ public class AVLT{
         Bl.parent = A;
     }
 
-    private void rotateRL(Node X,int dir){
+    private void rotateRL(Node X){
         Node A = X;
         Node B = X.rightNode;
         Node C = X.rightNode.leftNode;
@@ -87,7 +102,7 @@ public class AVLT{
         Node Cr = C.rightNode;
         Node Cl = C.leftNode;
 
-        if(dir == 1)
+        if(C.value>P.value)
             P.rightNode = C;
         else
             P.leftNode = C;
@@ -137,41 +152,42 @@ public class AVLT{
     public boolean deleteVal(int num){
         
         Node loc = this.inTree(num);
-
+        Node p;
         if (loc == null) 
             return false;
         else{
+            p = loc.parent;
             if(loc.leftNode == null)
-                swapAppropriate(loc,1);
+                swapAppropriate(loc);
             else
-                swapAppropriate(loc,-1);
+                swapAppropriate(loc);
 
             this.size--;
-            this.balanceTree();
+            this.balanceTree(p);
             return true;
         }
     }
 
-    private void swapAppropriate(Node child, int dir){
+    private void swapAppropriate(Node child){
         
         Node current;
         int temp;
         
         if(child.rightNode == null && child.leftNode == null){
-            if(dir == 1)
+            if(child.value>child.parent.value)
                 child.parent.rightNode = null;
             else
                 child.parent.leftNode = null;
         }
         else{
-            if(dir == 1){
+            if(child.value>child.parent.value){
                 current = child.rightNode;
                 while(current.rightNode != null)
                     current = current.rightNode;
                 temp = current.value;
                 child.value = temp;
-                swapAppropriate(current,-1);
-                this.balanceTree();
+                swapAppropriate(current);
+                this.balanceTree(current);
             }
             else{
                 current = child.leftNode;
@@ -179,8 +195,8 @@ public class AVLT{
                     current = current.leftNode;
                 temp = current.value;
                 child.value = temp;
-                swapAppropriate(current,1);
-                this.balanceTree();
+                swapAppropriate(current);
+                this.balanceTree(current);
             }
         }
     }
@@ -208,7 +224,7 @@ public class AVLT{
                 current.rightNode.level = 1 + current.rightNode.parent.level;
             }
             this.size++;
-            this.balanceTree();
+            this.balanceTree(current);
         }
         else
             return;
